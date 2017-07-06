@@ -7,9 +7,10 @@ cd $GOPATH/src/github.com/hzwy23/dbobj-example
 
 ```
 
-修改数据库连接信息，打开dbobj-example/conf/asofdate.conf
+1. 修改数据库连接信息，打开dbobj-example/conf/asofdate.conf，修改完成后保存。
+2. 将表导入数据库，表结构信息在sql_script.sql中。
 
-修改完成后保存。在dbobj-example目录中，执行下边命令
+在dbobj-example目录中，执行下边命令
 
 ```shell
 go run main.go
