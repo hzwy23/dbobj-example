@@ -11,8 +11,8 @@ type UserInfo struct {
 	UserName string
 }
 
-func GetUserDetails(userId int) ([]UserInfo, error) {
-	rows, err := dbobj.Query("select user_id,user_name from dbobj_test_table where age = ?", userId)
+func GetUserDetails(age int) ([]UserInfo, error) {
+	rows, err := dbobj.Query("select user_id,user_name from dbobj_test_table where age = ?", age)
 	if err != nil {
 		fmt.Println("query table failed", err)
 		return nil, err
@@ -26,6 +26,27 @@ func GetUserDetails(userId int) ([]UserInfo, error) {
 	return rst, nil
 }
 
+func GetUserDetails2(age int, rst *[]UserInfo) error {
+	return dbobj.QueryForSlice("select user_id,user_name from dbobj_test_table where age = ?", rst, age)
+}
+
+func GetUserDetails3(userId string, rst *UserInfo) error {
+	return dbobj.QueryForStruct("select user_id,user_name from dbobj_test_table where user_id = ?", rst, userId)
+}
+
+func GetUserDetails4(userId string, args ...interface{}) error {
+	rows, err := dbobj.Query("select user_id,user_name from dbobj_test_table where user_id = ?", userId)
+	if err != nil {
+		fmt.Println("query table failed", err)
+		return err
+	}
+	return dbobj.ScanRow(rows, args...)
+}
+
+func GetUserDetails5(args []interface{}, result ...interface{}) error {
+	return dbobj.QueryForObject("select user_id,user_name from dbobj_test_table where user_id = ? and age = ?", args, result...)
+}
+
 func main() {
 	tmp1, err := GetUserDetails(12)
 	if err != nil {
@@ -33,4 +54,31 @@ func main() {
 		return
 	}
 	fmt.Println("success", tmp1)
+
+	var rst []UserInfo
+	err = GetUserDetails2(12, &rst)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("ok,", rst)
+
+	var obj UserInfo
+	err = GetUserDetails3("China", &obj)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("three:", obj)
+
+	var id = ""
+	var name = ""
+	err = GetUserDetails4("China", &id, &name)
+	fmt.Println(err, id, name)
+	fmt.Println("***********************************")
+
+	id = ""
+	name = ""
+	err = GetUserDetails5(dbobj.PackArgs("China", 12), &id, &name)
+	fmt.Println(err, id, name)
 }
